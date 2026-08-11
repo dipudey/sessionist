@@ -34,6 +34,15 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+APP_TITLE = "ccsessions"   # terminal + app window title
+
+
+def set_terminal_title(title: str) -> None:
+    """Set the terminal tab/window title via OSC escape (xterm/iTerm/Terminal)."""
+    if sys.stdout.isatty():
+        sys.stdout.write(f"\033]0;{title}\007")
+        sys.stdout.flush()
+
 # ----------------------------------------------------------------------------
 # Data layer (no UI dependency, so it's independently testable)
 # ----------------------------------------------------------------------------
@@ -783,6 +792,7 @@ def run_ui(sessions: list[Session], scope: str | None = None) -> Session | None:
 # ----------------------------------------------------------------------------
 
 def main() -> int:
+    set_terminal_title(APP_TITLE)
     show_all = "--all" in sys.argv[1:] or "-a" in sys.argv[1:]
     scope = None if show_all else os.getcwd()
 
