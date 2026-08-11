@@ -29,25 +29,31 @@ The one dependency (`textual`) is installed automatically into an isolated virtu
 
 ## Install
 
-Pick whichever is easiest for you.
+### Fastest — one line (clones + installs automatically)
 
-### Option 1 — Double-click (macOS)
-
-In Finder, double-click **`install.command`**. It opens Terminal, installs everything, and waits for you to press Return.
-
-### Option 2 — One command
-
-From the project folder:
+Paste this into your terminal. It fetches the tool and installs it for you — no manual clone, no `cd`:
 
 ```bash
-bash install.sh
+curl -fsSL https://raw.githubusercontent.com/dipudey/sessionist/master/install.sh | bash
 ```
 
-### Option 3 — Make
+Want a specific command name? Pass it through:
 
 ```bash
-make install
+curl -fsSL https://raw.githubusercontent.com/dipudey/sessionist/master/install.sh | bash -s -- sess
 ```
+
+> Needs `git` and `curl` (both standard on macOS/Linux). The installer clones the repo to a temp folder, installs, and cleans up after itself.
+
+### Already cloned the repo?
+
+From inside the project folder, any of these work:
+
+```bash
+bash install.sh        # or:  make install
+```
+
+Or on macOS, double-click **`install.command`** in Finder — it opens Terminal, installs everything, and waits for you to press Return.
 
 ### Choosing your command name
 

@@ -24,21 +24,34 @@ INSTALL_DIR="$HOME/.$APP"
 VENV_DIR="$INSTALL_DIR/venv"
 SCRIPT_SRC=""   # resolved below
 SCRIPT_DST="$INSTALL_DIR/$APP.py"
+REPO_URL="${CCS_REPO:-https://github.com/dipudey/sessionist.git}"
+CLONE_TMP=""    # set if we clone; cleaned up on exit
 
 say()  { printf '\033[1;36m==>\033[0m %s\n' "$*"; }
 ok()   { printf '\033[1;32m ok\033[0m %s\n' "$*"; }
 die()  { printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2; exit 1; }
 
-# --- locate the script source (next to this installer, else cwd) -------------
+cleanup() { [ -n "$CLONE_TMP" ] && rm -rf "$CLONE_TMP"; }
+trap cleanup EXIT
+
+# --- locate the script source: next to installer, cwd, else clone the repo ---
 resolve_src() {
     local here
-    here="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
-    if [ -f "$here/$APP.py" ]; then
+    here="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)" || here=""
+    if [ -n "$here" ] && [ -f "$here/$APP.py" ]; then
         SCRIPT_SRC="$here/$APP.py"
     elif [ -f "./$APP.py" ]; then
         SCRIPT_SRC="$(pwd)/$APP.py"
     else
-        die "$APP.py not found next to install.sh. Run from the project directory."
+        # Standalone run (e.g. curl | bash) — fetch the repo ourselves.
+        command -v git >/dev/null 2>&1 || die "git is required to fetch the tool. Install git and retry."
+        say "Fetching $APP from $REPO_URL …"
+        CLONE_TMP="$(mktemp -d)"
+        git clone --depth 1 --quiet "$REPO_URL" "$CLONE_TMP" \
+            || die "Could not clone $REPO_URL. Check the URL / your access and retry."
+        [ -f "$CLONE_TMP/$APP.py" ] || die "$APP.py not found in the cloned repo."
+        SCRIPT_SRC="$CLONE_TMP/$APP.py"
+        ok "Fetched latest"
     fi
 }
 
